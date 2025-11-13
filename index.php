@@ -1,3 +1,55 @@
+<?php
+/**
+ * Cardápio Digital - Pizzaria
+ * Conectado com Supabase via PHP PDO
+ */
+
+// Incluir classes necessárias
+require_once __DIR__ . '/classes/Database.php';
+require_once __DIR__ . '/classes/Categoria.php';
+require_once __DIR__ . '/classes/Produto.php';
+
+// Variável para avisos de ambiente
+$erroAmbiente = '';
+
+// Inicializar classes e buscar dados do banco com tolerância a falhas
+try {
+    if (!extension_loaded('pdo_pgsql')) {
+        $erroAmbiente = 'A extensão pdo_pgsql não está ativa. Abra /cardapio/diagnostico.php para instruções de habilitação no XAMPP.';
+        $categorias = [];
+        $produtosPorCategoria = [];
+        $todosProdutos = [];
+    } else {
+        $categoriaClass = new Categoria();
+        $produtoClass = new Produto();
+
+        $categorias = $categoriaClass->buscarTodas();
+        $produtosPorCategoria = $produtoClass->organizarPorCategoria();
+        $todosProdutos = $produtoClass->buscarTodos();
+    }
+} catch (Throwable $e) {
+    error_log("Erro ao carregar dados: " . $e->getMessage());
+    $erroAmbiente = $e->getMessage();
+    $categorias = [];
+    $produtosPorCategoria = [];
+    $todosProdutos = [];
+}
+
+// Função para formatar preço
+function formatarPreco($preco) {
+    return 'R$ ' . number_format($preco, 2, ',', '.');
+}
+
+// Função para obter imagem padrão se não houver imagem
+function obterImagemProduto($imagemUrl, $nomeProduto) {
+    if (!empty($imagemUrl)) {
+        return $imagemUrl;
+    }
+    // Retorna uma imagem padrão do Unsplash baseada no nome do produto
+    $termo = urlencode(str_replace(' ', '+', $nomeProduto));
+    return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop&q=80";
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -64,64 +116,69 @@
         </div>
     </section>
 
+    <!-- Mensagem de ambiente -->
+    <?php if (!empty($erroAmbiente)): ?>
+    <div class="container mt-4">
+        <div class="alert alert-warning" role="alert">
+            ⚠️ <?= htmlspecialchars($erroAmbiente, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Cardápio -->
     <section id="cardapio" class="py-5">
         <div class="container">
-            
-            <!-- Pizzas Tradicionais -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-fire text-danger"></i> Pizzas Tradicionais</h2>
-                <p class="text-muted">Nossas pizzas clássicas que você adora</p>
-            </div>
-            <div class="row g-4 mb-5" id="pizzas-tradicionais">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
-            <!-- Pizzas Especiais -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-star-fill text-warning"></i> Pizzas Especiais</h2>
-                <p class="text-muted">Receitas exclusivas da casa</p>
-            </div>
-            <div class="row g-4 mb-5" id="pizzas-especiais">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
-            <!-- Pizzas Doces -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-heart-fill text-danger"></i> Pizzas Doces</h2>
-                <p class="text-muted">Para adoçar o seu dia</p>
-            </div>
-            <div class="row g-4 mb-5" id="pizzas-doces">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
-            <!-- Combos -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-bag-check-fill text-success"></i> Combos Especiais</h2>
-                <p class="text-muted">Pizza + Bebida com desconto imperdível!</p>
-            </div>
-            <div class="row g-4 mb-5" id="combos">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
-            <!-- Promoções -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-lightning-fill text-warning"></i> Promoções do Dia</h2>
-                <p class="text-muted">Aproveite nossas ofertas especiais!</p>
-            </div>
-            <div class="row g-4 mb-5" id="promocoes">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
-            <!-- Bebidas -->
-            <div class="section-header mb-4">
-                <h2><i class="bi bi-cup-straw text-info"></i> Bebidas</h2>
-                <p class="text-muted">Para acompanhar sua pizza</p>
-            </div>
-            <div class="row g-4 mb-5" id="bebidas">
-                <!-- Cards serão inseridos via JavaScript -->
-            </div>
-
+            <?php if (!empty($produtosPorCategoria)): ?>
+                <?php foreach ($produtosPorCategoria as $categoriaSlug => $dadosCategoria): ?>
+                    <?php 
+                    $categoria = $dadosCategoria['categoria'];
+                    $produtos = $dadosCategoria['produtos'];
+                    
+                    // Definir ícones por categoria
+                    $icones = [
+                        'pizzas-tradicionais' => 'bi-fire text-danger',
+                        'pizzas-especiais' => 'bi-star-fill text-warning',
+                        'pizzas-doces' => 'bi-heart-fill text-danger',
+                        'combos' => 'bi-bag-check-fill text-success',
+                        'promocoes' => 'bi-lightning-fill text-warning',
+                        'bebidas' => 'bi-cup-straw text-info'
+                    ];
+                    
+                    $icone = isset($icones[$categoriaSlug]) ? $icones[$categoriaSlug] : 'bi-circle-fill text-primary';
+                    ?>
+                    
+                    <!-- <?= htmlspecialchars($categoria['nome']) ?> -->
+                    <div class="section-header mb-4">
+                        <h2><i class="bi <?= $icone ?>"></i> <?= htmlspecialchars($categoria['nome']) ?></h2>
+                        <p class="text-muted">Confira nossos produtos desta categoria</p>
+                    </div>
+                    <div class="row g-4 mb-5" id="<?= htmlspecialchars($categoriaSlug) ?>">
+                        <?php foreach ($produtos as $produto): ?>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="product-card">
+                                    <img src="<?= htmlspecialchars(obterImagemProduto($produto['imagem_url'], $produto['nome'])) ?>" 
+                                         alt="<?= htmlspecialchars($produto['nome']) ?>" 
+                                         class="product-img">
+                                    <div class="product-body">
+                                        <h5 class="product-title"><?= htmlspecialchars($produto['nome']) ?></h5>
+                                        <p class="product-description"><?= htmlspecialchars($produto['descricao']) ?></p>
+                                        <p class="product-price"><?= formatarPreco($produto['preco']) ?></p>
+                                        <button class="btn btn-add-cart" onclick="adicionarAoCarrinho(<?= $produto['id'] ?>)">
+                                            <i class="bi bi-cart-plus"></i> Adicionar ao Carrinho
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-5">
+                    <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                    <h3 class="mt-3">Cardápio em Manutenção</h3>
+                    <p class="text-muted">Estamos atualizando nosso cardápio. Volte em breve!</p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 

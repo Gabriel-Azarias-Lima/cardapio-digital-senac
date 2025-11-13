@@ -1,168 +1,74 @@
-// ===== Dados dos Produtos =====
-const produtos = {
-    pizzasTradicionais: [
-        {
-            id: 1,
-            nome: "Pizza Margherita",
-            descricao: "Molho de tomate, mussarela, manjericão fresco e azeite",
-            preco: 45.00,
-            imagem: ""
-        },
-        {
-            id: 2,
-            nome: "Pizza Calabresa",
-            descricao: "Calabresa fatiada, cebola, mussarela e azeitonas",
-            preco: 48.00,
-            imagem: ""
-        },
-        {
-            id: 3,
-            nome: "Pizza Mussarela",
-            descricao: "Deliciosa mussarela de primeira qualidade",
-            preco: 42.00,
-            imagem: ""
-        },
-        {
-            id: 4,
-            nome: "Pizza Portuguesa",
-            descricao: "Presunto, ovos, cebola, azeitonas e mussarela",
-            preco: 52.00,
-            imagem: ""
+// ===== Dados dos Produtos (carregados do banco) =====
+let produtos = {};
+let todosProdutos = [];
+
+// Função para carregar produtos do banco de dados
+async function carregarProdutosDoBanco() {
+    try {
+        const response = await fetch('./api/produtos.php');
+        const data = await response.json();
+        
+        if (data.success) {
+            todosProdutos = data.data;
+            organizarProdutosPorCategoria();
+            return true;
+        } else {
+            console.error('Erro ao carregar produtos:', data.error);
+            return false;
         }
-    ],
-    pizzasEspeciais: [
-        {
-            id: 5,
-            nome: "Pizza Quattro Formaggi",
-            descricao: "Mussarela, gorgonzola, parmesão e provolone",
-            preco: 58.00,
-            imagem: ""
-        },
-        {
-            id: 6,
-            nome: "Pizza Pepperoni Premium",
-            descricao: "Pepperoni especial, mussarela e orégano",
-            preco: 55.00,
-            imagem: ""
-        },
-        {
-            id: 7,
-            nome: "Pizza Toscana",
-            descricao: "Calabresa, bacon, tomate seco e catupiry",
-            preco: 60.00,
-            imagem: ""
+    } catch (error) {
+        console.error('Erro na requisição:', error);
+        return false;
+    }
+}
+
+// Função para organizar produtos por categoria
+function organizarProdutosPorCategoria() {
+    produtos = {};
+    
+    todosProdutos.forEach(produto => {
+        const categoriaSlug = produto.categoria_slug;
+        
+        if (!produtos[categoriaSlug]) {
+            produtos[categoriaSlug] = [];
         }
-    ],
-    pizzasDoces: [
-        {
-            id: 8,
-            nome: "Pizza de Chocolate",
-            descricao: "Chocolate ao leite derretido com granulado",
-            preco: 38.00,
-            imagem: ""
-        },
-        {
-            id: 9,
-            nome: "Pizza Romeu e Julieta",
-            descricao: "Queijo minas e goiabada derretida",
-            preco: 40.00,
-            imagem: ""
-        },
-        {
-            id: 10,
-            nome: "Pizza de Nutella com Morango",
-            descricao: "Nutella cremosa com morangos frescos",
-            preco: 45.00,
-            imagem: ""
+        
+        // Adicionar badge baseado na categoria
+        if (categoriaSlug.includes('combo')) {
+            produto.badge = 'combo';
+        } else if (categoriaSlug.includes('promocao')) {
+            produto.badge = 'promo';
         }
-    ],
-    combos: [
-        {
-            id: 11,
-            nome: "Combo Família",
-            descricao: "2 Pizzas grandes + 2L Refrigerante",
-            preco: 85.00,
-            imagem: "",
-            badge: "combo"
-        },
-        {
-            id: 12,
-            nome: "Combo Casal",
-            descricao: "1 Pizza média + 1L Refrigerante",
-            preco: 55.00,
-            imagem: "",
-            badge: "combo"
-        }
-    ],
-    promocoes: [
-        {
-            id: 13,
-            nome: "Pizza do Dia - Frango Catupiry",
-            descricao: "Frango desfiado com catupiry cremoso",
-            preco: 39.90,
-            imagem: "",
-            badge: "promo"
-        },
-        {
-            id: 14,
-            nome: "2 Pizzas Tradicionais",
-            descricao: "Leve 2 pizzas tradicionais por um preço especial",
-            preco: 75.00,
-            imagem: "",
-            badge: "promo"
-        }
-    ],
-    bebidas: [
-        {
-            id: 15,
-            nome: "Refrigerante 2L",
-            descricao: "Coca-Cola, Guaraná ou Fanta",
-            preco: 10.00,
-            imagem: ""
-        },
-        {
-            id: 16,
-            nome: "Refrigerante Lata 350ml",
-            descricao: "Diversos sabores",
-            preco: 5.00,
-            imagem: ""
-        },
-        {
-            id: 17,
-            nome: "Suco Natural 500ml",
-            descricao: "Laranja, limão ou maracujá",
-            preco: 8.00,
-            imagem: ""
-        },
-        {
-            id: 18,
-            nome: "Água Mineral 500ml",
-            descricao: "Água mineral sem gás",
-            preco: 3.00,
-            imagem: ""
-        }
-    ]
-};
+        
+        produtos[categoriaSlug].push(produto);
+    });
+}
 
 // ===== Variável Global do Carrinho =====
 let carrinho = [];
 
 // ===== Inicialização =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     carregarCarrinhoLocalStorage();
-    renderizarProdutos();
+    
+    // Carregar produtos do banco se não foram carregados via PHP
+    if (todosProdutos.length === 0) {
+        const sucesso = await carregarProdutosDoBanco();
+        if (sucesso) {
+            renderizarProdutos();
+        }
+    }
+    
     inicializarEventos();
     atualizarCarrinho();
 });
 
 // ===== Renderizar Produtos =====
 function renderizarProdutos() {
-    renderizarCategoria('pizzas-tradicionais', produtos.pizzasTradicionais);
-    renderizarCategoria('pizzas-especiais', produtos.pizzasEspeciais);
-    renderizarCategoria('pizzas-doces', produtos.pizzasDoces);
-    renderizarCategoria('combos', produtos.combos);
-    renderizarCategoria('promocoes', produtos.promocoes);
-    renderizarCategoria('bebidas', produtos.bebidas);
+    // Renderizar todas as categorias dinamicamente
+    Object.keys(produtos).forEach(categoriaSlug => {
+        renderizarCategoria(categoriaSlug, produtos[categoriaSlug]);
+    });
 }
 
 function renderizarCategoria(containerId, items) {
@@ -280,15 +186,7 @@ function calcularTotal() {
 }
 
 function encontrarProdutoPorId(id) {
-    const todasCategorias = [
-        ...produtos.pizzasTradicionais,
-        ...produtos.pizzasEspeciais,
-        ...produtos.pizzasDoces,
-        ...produtos.combos,
-        ...produtos.promocoes,
-        ...produtos.bebidas
-    ];
-    return todasCategorias.find(p => p.id === id);
+    return todosProdutos.find(p => p.id === id);
 }
 
 // ===== LocalStorage =====
