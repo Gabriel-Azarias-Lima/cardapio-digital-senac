@@ -53,6 +53,27 @@ define('DB_PASS', 'sua-senha');
 ### 3. Extensões PHP
 - `pdo_pgsql` (execute `diagnostico.php` para verificar)
 
+### XAMPP (Windows): habilitar PostgreSQL
+1. Abra o arquivo `C:\xampp\php\php.ini`.
+2. Encontre e descomente as linhas (remova o `;` do início):
+```ini
+;extension=pdo_pgsql
+;extension=pgsql
+```
+Fique assim:
+```ini
+extension=pdo_pgsql
+extension=pgsql
+```
+3. Salve o arquivo e reinicie o Apache no XAMPP Control Panel (Stop e Start).
+4. Teste no navegador: `http://localhost/cardapio/diagnostico.php`.
+
+Resultado esperado:
+```
+✅ pdo_pgsql: Instalada
+✅ Conexão estabelecida com sucesso!
+```
+
 ## 🔧 Uso
 1. Configure o banco e credenciais
 2. Acesse `index.php` no navegador
