@@ -1,0 +1,172 @@
+-- === Tabelas base ===
+CREATE TABLE categorias (
+  id          SERIAL PRIMARY KEY,
+  nome        VARCHAR(100) NOT NULL,
+  slug        VARCHAR(100) NOT NULL UNIQUE,
+  created_at  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE produtos (
+  id             SERIAL PRIMARY KEY,
+  categoria_id   INT NOT NULL,
+  nome           VARCHAR(150) NOT NULL,
+  descricao      VARCHAR(500),
+  preco          NUMERIC(10,2) NOT NULL,
+  imagem_url     VARCHAR(500),
+  ativo          BOOLEAN DEFAULT TRUE,
+  created_at     TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_produtos_categoria
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE produto_tipos (
+  id          SERIAL PRIMARY KEY,
+  produto_id  INT NOT NULL,
+  nome        VARCHAR(100) NOT NULL,
+  ordem       INT DEFAULT 0,
+  created_at  TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_produto_tipos_produto
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE clientes (
+  id          SERIAL PRIMARY KEY,
+  nome        VARCHAR(150) NOT NULL,
+  telefone    VARCHAR(30)  NOT NULL UNIQUE,
+  created_at  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE enderecos (
+  id           SERIAL PRIMARY KEY,
+  cliente_id   INT NOT NULL,
+  rua          VARCHAR(200) NOT NULL,
+  numero       VARCHAR(20)  NOT NULL,
+  bairro       VARCHAR(120) NOT NULL,
+  cidade       VARCHAR(120) NOT NULL,
+  referencia   VARCHAR(200),
+  observacoes  TEXT,
+  created_at   TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_enderecos_cliente
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE carrinhos (
+  id           BIGSERIAL PRIMARY KEY,
+  cliente_id   INT NULL,
+  session_id   VARCHAR(100) NULL UNIQUE,
+  status       VARCHAR(20) NOT NULL DEFAULT 'aberto'
+                 CHECK (status IN ('aberto','expirado','convertido')),
+  created_at   TIMESTAMP DEFAULT NOW(),
+  updated_at   TIMESTAMP,
+  expires_at   TIMESTAMP NULL,
+  CONSTRAINT fk_carrinhos_cliente
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE carrinho_itens (
+  id              BIGSERIAL PRIMARY KEY,
+  carrinho_id     BIGINT NOT NULL,
+  produto_id      INT NOT NULL,
+  quantidade      INT NOT NULL,
+  preco_unitario  NUMERIC(10,2) NOT NULL,
+  subtotal        NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario) STORED,
+  created_at      TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_carrinho_itens_carrinho
+    FOREIGN KEY (carrinho_id) REFERENCES carrinhos(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_carrinho_itens_produto
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT uk_item_unico UNIQUE (carrinho_id, produto_id)
+);
+
+CREATE TABLE pedidos (
+  id               BIGSERIAL PRIMARY KEY,
+  cliente_id       INT NOT NULL,
+  tipo_pedido      VARCHAR(20) NOT NULL
+                     CHECK (tipo_pedido IN ('retirar','entrega')),
+  endereco_id      INT NULL,
+  metodo_pagamento VARCHAR(20) NOT NULL
+                     CHECK (metodo_pagamento IN ('dinheiro','cartao','pix')),
+  troco_para       NUMERIC(10,2),
+  total            NUMERIC(10,2) NOT NULL,
+  status           VARCHAR(20) NOT NULL DEFAULT 'criado'
+                     CHECK (status IN ('criado','confirmado','em_preparo','a_caminho','entregue','cancelado')),
+  created_at       TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_pedidos_cliente
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT fk_pedidos_endereco
+    FOREIGN KEY (endereco_id) REFERENCES enderecos(id)
+    ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE pedido_itens (
+  id              BIGSERIAL PRIMARY KEY,
+  pedido_id       BIGINT NOT NULL,
+  produto_id      INT NOT NULL,
+  quantidade      INT NOT NULL,
+  preco_unitario  NUMERIC(10,2) NOT NULL,
+  subtotal        NUMERIC(10,2) GENERATED ALWAYS AS (quantidade * preco_unitario) STORED,
+  CONSTRAINT fk_pedido_itens_pedido
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_pedido_itens_produto
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+-- === Seeds: Categorias ===
+INSERT INTO categorias (nome, slug) VALUES
+('Pizzas Tradicionais', 'pizzas-tradicionais'),
+('Pizzas Especiais',    'pizzas-especiais'),
+('Pizzas Doces',        'pizzas-doces'),
+('Combos Especiais',    'combos'),
+('Promoções do Dia',    'promocoes'),
+('Bebidas',             'bebidas');
+
+-- === Seeds: Produtos ===
+-- Tradicionais
+INSERT INTO produtos (categoria_id, nome, descricao, preco, imagem_url) VALUES
+((SELECT id FROM categorias WHERE slug='pizzas-tradicionais'),'Calabresa','Molho de tomate, mussarela, calabresa fatiada, cebola e orégano',26.00,'pizza-calabresa.png'),
+((SELECT id FROM categorias WHERE slug='pizzas-tradicionais'),'Mussarela','Molho de tomate, camada dupla de mussarela e orégano',25.00,'pizza-mussarela.png'),
+((SELECT id FROM categorias WHERE slug='pizzas-tradicionais'),'Portuguesa','Molho de tomate, mussarela, presunto, ovos, cebolas, pimentão, azeitona  e orégano',29.00,'pizza-portuguesa.png');
+
+-- Especiais
+INSERT INTO produtos (categoria_id, nome, descricao, preco, imagem_url) VALUES
+((SELECT id FROM categorias WHERE slug='pizzas-especiais'),'Quatro Queijos','Molho de tomate, camadas de mussarela, provolone, parmessão, gorgonzola e orégano',28.00,'pizza-quatro-queijos.png'),
+((SELECT id FROM categorias WHERE slug='pizzas-especiais'),'Brasileira','Molho de tomate, mussarela, calabresa picada, palmito, champignon, azeitonas e orégano',30.00,'pizza-brasileira.png'),
+((SELECT id FROM categorias WHERE slug='pizzas-especiais'),'Moda da Casa','Molho de tomate, mussarela, carne de sol, tomates em cubos, coentro, cebola, azeitona, catupiry e orégano',35.00,'pizza-moda-da-casa.png');
+
+-- Doces
+INSERT INTO produtos (categoria_id, nome, descricao, preco, imagem_url) VALUES
+((SELECT id FROM categorias WHERE slug='pizzas-doces'),'Banana com canela','Mussarela, banana, canela e açúcar',32.00,'pizza-banana-com-canela.png'),
+((SELECT id FROM categorias WHERE slug='pizzas-doces'),'Chocolate com morango','Creme de leite, lascas de chocolate e morangos',35.00,'pizza-chocolate-com-morango.png');
+
+-- Bebidas
+INSERT INTO produtos (categoria_id, nome, descricao, preco, imagem_url) VALUES
+((SELECT id FROM categorias WHERE slug='bebidas'),'Refrigerantes','Refrigerantes diversos em lata ou garrafa.',7.00,'refrigerante.png'),
+((SELECT id FROM categorias WHERE slug='bebidas'),'Sucos Naturais','Sucos naturais variados, preparados na hora.',8.00,'sucos.png');
+
+-- Tipos para Refrigerantes  (id = 20)
+INSERT INTO produto_tipos (produto_id, nome, ordem)
+VALUES
+  (20, 'Coca-Cola', 1),
+  (20, 'Fanta', 2),
+  (20, 'Sprite', 3),
+  (20, 'Guaraná', 4),
+  (20, 'Pepsi', 5);
+
+-- Tipos para Sucos Naturais (id = 19)
+INSERT INTO produto_tipos (produto_id, nome, ordem)
+VALUES
+  (19, 'Laranja', 1),
+  (19, 'Limão', 2),
+  (19, 'Morango', 3),
+  (19, 'Abacaxi', 4),
+  (19, 'Maracujá', 5);
+
