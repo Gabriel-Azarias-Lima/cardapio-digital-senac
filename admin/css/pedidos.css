@@ -1,0 +1,453 @@
+/* ========== PEDIDOS GRID ========== */
+.pedidos-container {
+    padding: 0 32px 24px;
+}
+
+.pedidos-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.pedido-card {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.pedido-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pedido-info {
+    flex: 1;
+}
+
+.pedido-numero {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.pedido-data {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pedido-data i {
+    font-size: 14px;
+}
+
+.pedido-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge i {
+    font-size: 10px;
+}
+
+.status-criado {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+.status-confirmado {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-em_preparo {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.status-a_caminho {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.status-entregue {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-cancelado {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.tipo-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pedido-body {
+    margin-bottom: 20px;
+}
+
+.cliente-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 10px;
+}
+
+.cliente-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-orange));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.cliente-detalhes {
+    flex: 1;
+}
+
+.cliente-nome {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.cliente-telefone {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.itens-lista {
+    margin-bottom: 16px;
+}
+
+.item-pedido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.item-pedido:last-child {
+    border-bottom: none;
+}
+
+.item-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.item-quantidade {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--primary-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.item-nome {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.item-preco {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.endereco-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.endereco-info i {
+    color: var(--primary-orange);
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+.endereco-texto {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.pagamento-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.pagamento-info i {
+    color: var(--success-green);
+    font-size: 18px;
+}
+
+.pagamento-texto {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.pagamento-metodo {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.pedido-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.pedido-total {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.total-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.total-valor {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-blue);
+}
+
+.pedido-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-view {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.btn-view:hover {
+    background: var(--border-color);
+}
+
+.btn-print {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-print:hover {
+    background: #0052a3;
+    transform: translateY(-2px);
+}
+
+/* ========== PAGINATION ========== */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination-buttons .btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-buttons .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== EMPTY STATE ========== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 32px;
+    gap: 12px;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: var(--text-light);
+}
+
+.empty-state p {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.empty-state small {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .pedidos-container {
+        padding: 0 16px 16px;
+    }
+
+    .pedido-card {
+        padding: 16px;
+    }
+
+    .pedido-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .pedido-status {
+        align-items: flex-start;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .pedido-footer {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .pedido-actions {
+        width: 100%;
+    }
+
+    .btn-action {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .pagination-container {
+        padding: 16px;
+        flex-direction: column;
+    }
+
+    .pagination-buttons {
+        width: 100%;
+    }
+
+    .pagination-buttons .btn-secondary {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.pedido-card {
+    animation: slideIn 0.4s ease-out;
+}
+
+.pedido-card:nth-child(1) { animation-delay: 0.05s; }
+.pedido-card:nth-child(2) { animation-delay: 0.1s; }
+.pedido-card:nth-child(3) { animation-delay: 0.15s; }
+.pedido-card:nth-child(4) { animation-delay: 0.2s; }
+.pedido-card:nth-child(5) { animation-delay: 0.25s; }
