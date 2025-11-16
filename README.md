@@ -131,6 +131,10 @@ Resultado esperado:
 **Acesso rápido:**
 - Dashboard Admin: `http://localhost/cardapio-digital-senac-main/admin/`
 
+## 🌐 Sites hospedados
+- Loja / Cardápio: https://senac-projetos-senac-cardapio-digital.qymvda.easypanel.host/
+- Administração: https://senac-projetos-senac-cardapio-digital.qymvda.easypanel.host/admin/
+
 ## Notas
 - Sistema tolerante a falhas (funciona mesmo sem banco)
 - Validação de ambiente automática
