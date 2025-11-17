@@ -8,7 +8,7 @@ Sistema de cardápio digital responsivo com backend PHP e banco PostgreSQL (Supa
 - Lucas Felippe de Siqueira
 - Suzana Rodrigues Feliciano de Sousa
 - Bruno Stefânio G. da Silva
-- André Albergaria
+- André Luís Rodrigues Soares de Albergaria
 
 ## 🚀 Funcionalidades
 
