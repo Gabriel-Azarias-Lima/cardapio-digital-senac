@@ -3,9 +3,10 @@
 Sistema de cardápio digital responsivo com backend PHP e banco PostgreSQL (Supabase).
 
 ## 👥 Integrantes
-- Gabriel Azarias de Lima — Backend e frontend
-- Nome 2 — Papel
-- Nome 3 — Papel
+- Gabriel Azarias de Lima
+- Rafael Silva Coelho
+- Lucas Felippe de Siqueira
+- Suzana Rodrigues Feliciano de Sousa
 
 ## 🚀 Funcionalidades
 
